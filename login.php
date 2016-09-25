@@ -1,67 +1,99 @@
-
-
 <?php
-	
+require ("../../config.php");
+	// var_dump (empty)
 	//var_dump ($_GET);
 	//echo "<br>";
 	//var_dump ($_POST);
 	$signupemailerror = "";
 	$signuppassworderror = "";
+	$signupemail = "";
+	$loginemail = "";
 	$loginemailerror = "";
 	$loginpassworderror = "";
 	$nimierror = "";
-	$pereerror = "";
-	
 	//kas epost oli olemas
+	
 	if(isset ($_POST["signupemail"])){
 		
 		if (empty ($_POST["signupemail"])){
 			
 			// oli email, kuid see oli tühi
 			$signupemailerror = "See väli on tühi";
-			
-		}else {
-			//tean et oli parool ja ei olnud tühi.
-			//vähemalt 8
-			if (strlen($_POST["signuppassword"]) < 8) {
-				$signuppassworderror = "Parool peab olema vähemalt 8 tähemärkki pikk";
-			}
-			
+		} else {
+			// email on õige, salvestan väärtuse muutujasse
+			$signupemail = $_POST["signupemail"];	
 		}
 	}
 
 	if(isset ($_POST["signuppassword"])){
 		if (empty ($_POST["signuppassword"])){
 			$signuppassworderror = "See väli on tühi";
-		}
-		
+		} else {
+			//tean et oli parool ja ei olnud tühi.
+			//vähemalt 8
+			if (strlen($_POST["signuppassword"]) < 8) {
+				$signuppassworderror = "Parool peab olema vähemalt 8 tähemärkki pikk";
+			}
+		}	
 	}
 	
-	if (isset ($_POST["loginemail"])) {
-		if (empty ($_POST ["loginemail"])){
+	if(isset ($_POST["loginemail"])){
+		
+		if (empty ($_POST["loginemail"])){
+			
+			// oli email, kuid see oli tühi
 			$loginemailerror = "See väli on tühi";
-		}else {
-			if (strlen ($_POST["loginpassword"])< 8) {
+		} else {
+			// email on õige, salvestan väärtuse muutujasse
+			$loginemail = $_POST["loginemail"];
+			
+		}
+	}
+
+	if(isset ($_POST["loginpassword"])){
+		if (empty ($_POST["loginpassword"])){
+			$loginpassworderror = "See väli on tühi";
+		} else {
+			//tean et oli parool ja ei olnud tühi.
+			//vähemalt 8
+			if (strlen($_POST["loginpassword"]) < 8) {
 				$loginpassworderror = "Parool peab olema vähemalt 8 tähemärkki pikk";
 			}
-		}
+		}	
 	}
-	
-	if (isset($_POST ["loginpassword"])){
-		if (empty ($_POST ["loginpassword"])){
-			$loginpassworderror = "See väli on tühi";
-		}
-	}
-	
-	if (isset ($_POST ["eesnimi"])){
-		if (empty($_POST ["nimierror"])){
-			$nimierror = "See väli on tühi";
-		}
-	}
-	
-	if (isset ($_POST ["perenimi"])){
-		if (empty($_POST ["pereerror"])){
-			$pereerror = "See väli on tühi";
+	// Tean et ühtegi viga ei olnud ja saan kasutaja anmed salvestada
+	if (isset($_POST["signuppassword"])&&
+		isset ($_POST["signupemail"])&&
+		empty ($signupemailerror)&& 
+		empty ($signuppassworderror))
+		{
+		
+		echo "Salvestan...<br>";
+		echo "email".$signupemail. "<br>";
+		
+		$password = hash ("sha512", $_POST["signuppassword"]);
+		
+		echo "parool".$_POST["signuppassword"]."<br>";
+		echo "räsi".$password."<br>";
+		
+		//echo $serverUsername;
+		//echo $serverPassword;
+		//ühedus
+		$database = "if16_anna";
+		$mysqli = new mysqli ($serverHost, $serverUsername, $serverPassword, $database);
+		//käsk
+		$stmt = $mysqli->prepare("INSERT INTO user_sample (email, password) VALUES (?,?)");
+		//asendan ?,? väärtustega
+		//iga muutuja kohta 1 täht, mis tüüpi muutuja on
+		//s - string
+		//i - integer
+		//d - double/float
+		$stmt->bind_param("ss", $signupemail, $password);
+		if ($stmt->execute()){
+			echo "salvestamine õnnestus";
+		}else {
+			echo "ERROR".$stmt->error;
+		
 		}
 	}
 	
@@ -82,52 +114,52 @@
 	</style>
 
 
-		<h1><font color = "blue">Logi sisse</font></h1>
+		<h1><font color = "blue">Sign in</font></h1>
 		<form method = "POST">
 			<!--<label>E-post</label><br>-->
-			<input name="loginemail" type = "email" placeholder="E-post"> <?php echo $loginemailerror; ?>
+			<input name="loginemail" type = "email" placeholder="Email" value ="<?php echo $loginemail; ?>"><?php echo $loginemailerror; ?>
 			<br><br>
-			<input name="loginpassword" type = "password" placeholder="Parool"> <?php echo $loginpassworderror; ?>
+			<input name="loginpassword" type = "password" placeholder="Password"> <?php echo $loginpassworderror; ?>
 			<br><br>
-			<input type="submit" value="Logi sisse">
+			<input type="submit" value="Sign in">
 		</form>
 
 	</body>
 </html>
 
-<h1><font color = "blue">Loo kasutaja</font></h1>
+<h1><font color = "blue">Sign up</font></h1>
 		<form method = "POST">
 			<!--<label>E-post</label><br>-->
-			<input name="signupemail" type = "email" placeholder="E-post"><?php echo $signupemailerror; ?>
+			<input name="signupemail" type = "email" placeholder="Email" value ="<?php echo $signupemail; ?>"><?php echo $signupemailerror; ?>
 			<br><br>
-			<input name="signuppassword" type="password" placeholder="Parool"><?php echo $signuppassworderror; ?>
+			<input name="signuppassword" type="password" placeholder="Password"><?php echo $signuppassworderror; ?>
 			<br><br>
-			<b><font color = "blue">Nimi</font></b> 
-			<p>
-			<input name ="eesnimi" placeholder = "Eesnimi"><?php echo $nimierror; ?>
-			<br><br>
-			<input name="perenimi" placeholder="Perekonnanimi"><?php echo $pereerror; ?>
+			<input name ="kasutajanimi" placeholder = "Nickname"><?php echo $nimierror; ?>
 			
 		<p>
-			<b><font color = "blue">Sugu</font></b>
-			<p>
-			<input type="radio" name="gender" value="male"> <i>Mees</i><br>
-			<input type="radio" name="gender" value="female"> <i>Naine</i><br>
-			<input type="radio" name="gender" value="other"> <i>Muu</i><br>
+			<b><font color = "blue">Gender</font></b>
+			
 		<p>
 		
-			<input type="submit" value="Logi sisse">
+			<select name="sugu">
+			<option value="1" selected= "selected">male</option>
+			<option value="2">female</option>
+			<option value="3">other</option>
+			</select>
+		<p>
+		
+			<input type="submit" value="Sign up">
 		</form>
 		
 		<html>
 		<body>
-		<h1>MVP IDEE</h1>
+		<h1><font color = "blue">MVP idee</font></h1>
 		<p>
-	    League of legends art community 
+	    <i><b>League of legends art community</b></i>
 		<p>
-		veebileht inimestele, kes on huvitatud arvutimängust League of Legends ja joonistavad/harrastavad sellega seotuid fan art'e.
+		<i>Veebileht inimestele, kes on huvitatud arvutimängust League of Legends ja joonistavad/harrastavad sellega seotuid fan art'e.
 		<p> on võimalus lisada enda joonistusi, hinnata teiste fan art'e.
-		<p> On ka olemas kommenteerimise võimalus,paremuse lehekülg, portfolio loomise võimalus.
+		<p> On ka olemas kommenteerimise võimalus,paremuse lehekülg, portfolio loomise võimalus.</i>
 		</body>
 		</html>
 	
