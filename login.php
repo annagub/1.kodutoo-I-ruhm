@@ -1,5 +1,12 @@
 <?php
 require ("../../config.php");
+require("functions.php");
+
+if (isset ($_SESSION["userId"])) {
+		
+		header("Location: data.php");
+		
+	}
 	// var_dump (empty)
 	//var_dump ($_GET);
 	//echo "<br>";
@@ -7,6 +14,7 @@ require ("../../config.php");
 	$signupemailerror = "";
 	$signuppassworderror = "";
 	$signupemail = "";
+	$nickname = "";
 	$loginemail = "";
 	$loginemailerror = "";
 	$loginpassworderror = "";
@@ -35,6 +43,17 @@ require ("../../config.php");
 				$signuppassworderror = "Parool peab olema vähemalt 8 tähemärkki pikk";
 			}
 		}	
+	}
+	if(isset ($_POST["nickname"])){
+		
+		if (empty ($_POST["nickname"])){
+			
+			
+			$nimierror = "See väli on tühi";
+		} else {
+			
+			$nickname = $_POST["nickname"];	
+		}
 	}
 	
 	if(isset ($_POST["loginemail"])){
@@ -75,6 +94,24 @@ require ("../../config.php");
 		
 		echo "parool".$_POST["signuppassword"]."<br>";
 		echo "räsi".$password."<br>";
+		signup($signupemail, $password);
+	}
+	
+	$error = "";
+	// kontrollin, et kasutaja täitis välja ja võib sisse logida
+	if ( isset($_POST["loginEmail"]) &&
+		 isset($_POST["loginPassword"]) &&
+		 !empty($_POST["loginEmail"]) &&
+		 !empty($_POST["loginPassword"])
+	  ) {
+		
+		//login sisse
+		$error = login($_POST["loginEmail"], $_POST["loginPassword"]);
+		
+	}
+	
+		
+		
 		
 		//echo $serverUsername;
 		//echo $serverPassword;
@@ -95,8 +132,6 @@ require ("../../config.php");
 			echo "ERROR".$stmt->error;
 		
 		}
-	}
-	
 ?>
 <!DOCTYPE html>
 <html>
@@ -134,7 +169,7 @@ require ("../../config.php");
 			<br><br>
 			<input name="signuppassword" type="password" placeholder="Password"><?php echo $signuppassworderror; ?>
 			<br><br>
-			<input name ="kasutajanimi" placeholder = "Nickname"><?php echo $nimierror; ?>
+			<input name ="nickname" type = "text" placeholder = "Nickname" value ="<?php echo $nickname; ?>"><?php echo $nimierror; ?>
 			
 		<p>
 			<b><font color = "blue">Gender</font></b>
