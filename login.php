@@ -43,9 +43,9 @@ if (isset ($_SESSION["userId"])) {
 				}
 				else 
 				{		
-					if (strlen ($_POST["nickname"]) <8)
+					if (strlen ($_POST["signupnickname"]) <8)
 					{
-						$nicknameerror = "Kasutajanimi peab olema vähemalt 8 tähemärkki pikk";	
+						$signupnicknameerror = "Kasutajanimi peab olema vähemalt 8 tähemärkki pikk";	
 					}
 				}
 		}
@@ -180,7 +180,7 @@ if (isset ($_SESSION["userId"])) {
 			<br><br>
 			<input name="signuppassword" type="password" placeholder="Password"><?php echo $signuppassworderror; ?>
 			<br><br>
-			<input name ="nickname" type = "text" placeholder = "Nickname" value ="<?php echo $signupnickname; ?>"><?php echo $signupnicknameerror; ?>
+			<input name ="signupnickname" type = "text" placeholder = "Nickname" value ="<?php echo $signupnickname; ?>"><?php echo $signupnicknameerror; ?>
 			
 		<p>
 			<b><font color = "blue">Gender</font></b>
