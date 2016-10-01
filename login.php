@@ -1,138 +1,149 @@
 <?php
+	
+	/*
+	var_dump($_GET);
+	echo "<br>";
+	var_dump($_POST);
+	*/
+	
 require ("../../config.php");
 require("functions.php");
-
 if (isset ($_SESSION["userId"])) {
-		
-		header("Location: data.php");
-		
+	header("Location: data.php");
 	}
-	// var_dump (empty)
-	//var_dump ($_GET);
-	//echo "<br>";
-	//var_dump ($_POST);
+	
 	$signupemailerror = "";
 	$signuppassworderror = "";
 	$signupemail = "";
-	$nickname = "";
+	$signupnickname = "";
 	$loginemail = "";
 	$loginemailerror = "";
 	$loginpassworderror = "";
-	$nimierror = "";
-	//kas epost oli olemas
+	$signupnicknameerror = "";
 	
-	if(isset ($_POST["signupemail"])){
+	//Kas e-post oli olemas?
+	if (isset ($_POST["signupemail"]))
+		{
+			if (empty ($_POST["signupemail"]))
+				{
+					//tühi
+					$signupemailerror = "See väli on kohustuslik.";
+				}
+				else
+				{
+					$signupemail = $_POST["signupemail"];
+				}
 		
-		if (empty ($_POST["signupemail"])){
-			
-			// oli email, kuid see oli tühi
-			$signupemailerror = "See väli on tühi";
-		} else {
-			// email on õige, salvestan väärtuse muutujasse
-			$signupemail = $_POST["signupemail"];	
 		}
-	}
-
-	if(isset ($_POST["signuppassword"])){
-		if (empty ($_POST["signuppassword"])){
-			$signuppassworderror = "See väli on tühi";
-		} else {
-			//tean et oli parool ja ei olnud tühi.
-			//vähemalt 8
-			if (strlen($_POST["signuppassword"]) < 8) {
-				$signuppassworderror = "Parool peab olema vähemalt 8 tähemärkki pikk";
-			}
-		}	
-	}
-	if(isset ($_POST["nickname"])){
-		
-		if (empty ($_POST["nickname"])){
-			
-			
-			$nimierror = "See väli on tühi";
-		} else {
-			
-			$nickname = $_POST["nickname"];	
+	if (isset ($_POST["signupnickname"]))
+		{
+			if (empty ($_POST["signupnickname"]))
+				{
+					$signupnicknameerror = "See väli on kohustuslik.";
+				}
+				else 
+				{		
+					if (strlen ($_POST["nickname"]) <8)
+					{
+						$nicknameerror = "Kasutajanimi peab olema vähemalt 8 tähemärkki pikk";	
+					}
+				}
 		}
-	}
-	
-	if(isset ($_POST["loginemail"])){
-		
-		if (empty ($_POST["loginemail"])){
-			
-			// oli email, kuid see oli tühi
-			$loginemailerror = "See väli on tühi";
-		} else {
-			// email on õige, salvestan väärtuse muutujasse
-			$loginemail = $_POST["loginemail"];
-			
+	if (isset ($_POST["signuppassword"]))
+		{
+			if (empty ($_POST["signuppassword"]))
+				{
+					
+					$signuppassworderror = "See väli on kohustuslik.";
+				}
+				else
+				{
+					//Kontrollin pikkust
+					if (strlen($_POST["signuppassword"]) < 8)
+					{
+						$signuppassworderror = "Parool peab olema vähemalt 8 tähemärki pikk.";
+					}
+				}
 		}
-	}
-
-	if(isset ($_POST["loginpassword"])){
-		if (empty ($_POST["loginpassword"])){
-			$loginpassworderror = "See väli on tühi";
-		} else {
-			//tean et oli parool ja ei olnud tühi.
-			//vähemalt 8
-			if (strlen($_POST["loginpassword"]) < 8) {
-				$loginpassworderror = "Parool peab olema vähemalt 8 tähemärkki pikk";
-			}
-		}	
-	}
-	// Tean et ühtegi viga ei olnud ja saan kasutaja anmed salvestada
-	if (isset($_POST["signuppassword"])&&
+			if (isset($_POST["signuppassword"])&&
 		isset ($_POST["signupemail"])&&
+		isset ($_POST["nickname"])&&
 		empty ($signupemailerror)&& 
-		empty ($signuppassworderror))
+		empty ($signuppassworderror)&&
+		empty ($nicknameerror))
 		{
 		
 		echo "Salvestan...<br>";
 		echo "email".$signupemail. "<br>";
+		echo "password ".$_POST["signuppassword"]."<br>";
+		echo "nickname" .$_POST["nickname"]."<br>";
 		
 		$password = hash ("sha512", $_POST["signuppassword"]);
 		
 		echo "parool".$_POST["signuppassword"]."<br>";
 		echo "räsi".$password."<br>";
-		signup($signupemail, $password);
-	}
+		}
+				
+				
+			
+		
+				$database = "if16_anna";
+			
+				$mysqli = new mysqli($serverHost, $serverUsername, $serverPassword, $database);
+			
+				$stmt = $mysqli->prepare("INSERT INTO user_sample (email,password,nickname) VALUES (?, ?, ?)");
+				echo $mysqli->error;
+			//s stringi
+			//i integer
+			//d double/float
+				$stmt->bind_param("sss", $signupmail, $password, $signupnickname);
+		
+	if ($stmt->execute()){
+			echo "Salvestamine õnnestus";
+		}else {
+			echo "Viga ".$stmt->error;
+		$stmt->close();
+		$mysqli->close();
+		}
 	
-	$error = "";
+	if (isset ($_POST["loginemail"]))
+		{
+			if (empty ($_POST["loginemail"]))
+				{
+					
+					$loginemailerror = "See väli on kohustuslik.";
+				}
+		}
+	
+	if (isset ($_POST["loginpassword"]))
+		{
+			if (empty ($_POST["loginpassword"]))
+				{
+					
+					$loginpassworderror = "See väli on kohustuslik.";
+				}
+				else 
+				{
+					if (strlen($_POST["loginpassword"]) < 8)
+					{
+					$loginpassworderror = "Parool peab olema vähemalt 8 tähemärki pikk.";
+					}
+				}
+		}
+		$error = "";
 	// kontrollin, et kasutaja täitis välja ja võib sisse logida
-	if ( isset($_POST["loginEmail"]) &&
-		 isset($_POST["loginPassword"]) &&
-		 !empty($_POST["loginEmail"]) &&
-		 !empty($_POST["loginPassword"])
+	if ( isset($_POST["loginemail"]) &&
+		 isset($_POST["loginpassword"]) &&
+		 !empty($_POST["loginemail"]) &&
+		 !empty($_POST["loginpassword"])
 	  ) {
 		
 		//login sisse
-		$error = login($_POST["loginEmail"], $_POST["loginPassword"]);
+		$error = login($_POST["loginemail"], $_POST["loginpassword"]);
 		
 	}
-	
-		
-		
-		
-		//echo $serverUsername;
-		//echo $serverPassword;
-		//ühedus
-		$database = "if16_anna";
-		$mysqli = new mysqli ($serverHost, $serverUsername, $serverPassword, $database);
-		//käsk
-		$stmt = $mysqli->prepare("INSERT INTO user_sample (email, password) VALUES (?,?)");
-		//asendan ?,? väärtustega
-		//iga muutuja kohta 1 täht, mis tüüpi muutuja on
-		//s - string
-		//i - integer
-		//d - double/float
-		$stmt->bind_param("ss", $signupemail, $password);
-		if ($stmt->execute()){
-			echo "salvestamine õnnestus";
-		}else {
-			echo "ERROR".$stmt->error;
-		
-		}
 ?>
+
 <!DOCTYPE html>
 <html>
 	<head>
@@ -169,7 +180,7 @@ if (isset ($_SESSION["userId"])) {
 			<br><br>
 			<input name="signuppassword" type="password" placeholder="Password"><?php echo $signuppassworderror; ?>
 			<br><br>
-			<input name ="nickname" type = "text" placeholder = "Nickname" value ="<?php echo $nickname; ?>"><?php echo $nimierror; ?>
+			<input name ="nickname" type = "text" placeholder = "Nickname" value ="<?php echo $signupnickname; ?>"><?php echo $signupnicknameerror; ?>
 			
 		<p>
 			<b><font color = "blue">Gender</font></b>
