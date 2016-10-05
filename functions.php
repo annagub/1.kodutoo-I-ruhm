@@ -1,7 +1,7 @@
 <?php
 	
 	//functions.php
-	
+	require("../../config.php");
 	//alustan sessiooni, et saaks kasutada
 	//$_SESSSION muutujaid
 	session_start();
@@ -18,10 +18,10 @@
 		
 		$mysqli = new mysqli($GLOBALS["serverHost"],$GLOBALS["serverUsername"],$GLOBALS["serverPassword"],$GLOBALS["database"]);
 
-		$stmt = $mysqli->prepare("INSERT INTO user_sample (email, password) VALUES (?, ?)");
+		$stmt = $mysqli->prepare("INSERT INTO user_sample (email, password, nickname) VALUES (?, ?, ?)");
 		echo $mysqli->error;
 
-		$stmt->bind_param("ss", $email, $password);
+		$stmt->bind_param("sss", $email, $password, $nickname);
 		
 		if ($stmt->execute()) {
 			echo "salvestamine õnnestus";
@@ -87,14 +87,53 @@
 	}
 	
 	
+	function finish_registration ($birthday, $country) {
+		
+		$mysqli = new mysqli($GLOBALS["serverHost"],$GLOBALS["serverUsername"],$GLOBALS["serverPassword"],$GLOBALS["database"]);
+
+		$stmt = $mysqli->prepare("INSERT INTO finish_registration (birthday, country) VALUES (?, ?)");
+		echo $mysqli->error;
+
+		$stmt->bind_param("ss", $birthday, $country);
+		
+		if ($stmt->execute()) {
+			echo "salvestamine õnnestus";
+		} else {
+			echo "ERROR ".$stmt->error;
+		}
+		
+	}
+
 	
-	
-	
-	
-	
-	
-	
-	
+	function getAllPeople(){
+		$mysqli = new mysqli($GLOBALS["serverHost"],$GLOBALS["serverUsername"],$GLOBALS["serverPassword"],$GLOBALS["database"]);
+
+		$stmt = $mysqli->prepare("
+			SELECT id, birthday, country, created FROM finish_registration
+		");
+		echo $mysqli->error;
+		$stmt->bind_result($id, $birthday, $country, $created);
+		$stmt->execute();
+		
+		$result=array();
+		
+		//seni kui on üks rida andmeid saada(10 rida = 10 korda)
+		while ($stmt->fetch()){
+			$person = new StdClass();
+			$person->id = $id;
+			$person->birthday = $birthday;
+			$person->country = $country;
+			$person->created = $created;
+			
+			array_push($result, $person);
+			
+			
+		}
+		$stmt->close();
+		$mysqli->close();
+		
+		return $result;
+	}
 	
 	
 	
